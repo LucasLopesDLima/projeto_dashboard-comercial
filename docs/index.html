@@ -24,7 +24,13 @@ let chart
 fetch('data.json')
   .then(res => res.json())
   .then(json => {
-    dados = json
+   
+    // Mostrar data de atualização
+document.getElementById('ultimaAtualizacao')
+  .innerText = "Última atualização: " + json.atualizado_em
+
+// Pegar os dados corretos
+dados = json.dados
 
     // Preencher filtro dinamicamente
     const regioes = [...new Set(dados.map(d => d.regiao))]
