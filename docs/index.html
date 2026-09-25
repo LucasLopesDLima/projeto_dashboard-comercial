@@ -6,34 +6,62 @@
 </head>
 <body>
 
+<!-- Título -->
 <h2>Vendas por Vendedor</h2>
-  
+
+<!-- Última atualização (vem do ETL) -->
 <p id="ultimaAtualizacao" style="color: gray; font-size: 12px;"></p>
+
+<!-- KPI principal -->
 <h3 id="kpiTotal"></h3>
 
+<!-- Filtro -->
 <label>Filtrar por Região:</label>
 <select id="filtroRegiao">
   <option value="all">Todas</option>
 </select>
 
+<!-- Gráfico 1 -->
 <canvas id="grafico"></canvas>
 
+<!-- Gráfico 2 -->
+<h2>Vendas por Mês</h2>
+<canvas id="graficoMes"></canvas>
+
 <script>
+
+// ========================
+// VARIÁVEIS GLOBAIS
+// ========================
 let dados = []
 let chart
+let chartMes
 
+// ========================
+// CARREGAR DADOS
+// ========================
 fetch('data.json')
   .then(res => res.json())
   .then(json => {
-   
-    // Mostrar data de atualização
-document.getElementById('ultimaAtualizacao')
-  .innerText = "Última atualização: " + json.atualizado_em
 
-// Pegar os dados corretos
-dados = json.dados
+    // 🕒 Última atualização
+    document.getElementById('ultimaAtualizacao')
+      .innerText = "Última atualização: " + json.atualizado_em
 
-    // Preencher filtro dinamicamente
+    // 📊 Dados principais
+    dados = json.dados
+
+    // ========================
+    // KPI TOTAL
+    // ========================
+    const totalGeral = dados.reduce((acc, d) => acc + d.total, 0)
+
+    document.getElementById('kpiTotal')
+      .innerText = "Total de Vendas: R$ " + totalGeral.toLocaleString('pt-BR')
+
+    // ========================
+    // PREENCHER FILTRO
+    // ========================
     const regioes = [...new Set(dados.map(d => d.regiao))]
     const select = document.getElementById('filtroRegiao')
 
@@ -44,24 +72,40 @@ dados = json.dados
       select.appendChild(option)
     })
 
-    atualizarGrafico('all')
+    // Render inicial
+    atualizarGraficos('all')
   })
 
+// ========================
+// EVENTO DO FILTRO
+// ========================
 document.getElementById('filtroRegiao')
   .addEventListener('change', (e) => {
-    atualizarGrafico(e.target.value)
+    atualizarGraficos(e.target.value)
   })
 
-function atualizarGrafico(regiao) {
+// ========================
+// FUNÇÃO PRINCIPAL
+// ========================
+function atualizarGraficos(regiao) {
 
+  // Filtrar dados
   let filtrado = regiao === 'all'
     ? dados
     : dados.filter(d => d.regiao === regiao)
 
-  // Agrupar no frontend
+  atualizarGraficoVendedor(filtrado)
+  atualizarGraficoMes(filtrado)
+}
+
+// ========================
+// GRÁFICO POR VENDEDOR
+// ========================
+function atualizarGraficoVendedor(dadosFiltrados) {
+
   let resumo = {}
 
-  filtrado.forEach(d => {
+  dadosFiltrados.forEach(d => {
     if (!resumo[d.vendedor]) {
       resumo[d.vendedor] = 0
     }
@@ -84,6 +128,39 @@ function atualizarGrafico(regiao) {
     }
   })
 }
+
+// ========================
+// GRÁFICO POR MÊS
+// ========================
+function atualizarGraficoMes(dadosFiltrados) {
+
+  let resumoMes = {}
+
+  dadosFiltrados.forEach(d => {
+    if (!resumoMes[d.mes]) {
+      resumoMes[d.mes] = 0
+    }
+    resumoMes[d.mes] += d.total
+  })
+
+  // 🔥 Ordenar meses corretamente
+  let labels = Object.keys(resumoMes).sort((a,b) => a-b)
+  let valores = labels.map(l => resumoMes[l])
+
+  if (chartMes) chartMes.destroy()
+
+  chartMes = new Chart(document.getElementById('graficoMes'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Vendas por Mês',
+        data: valores
+      }]
+    }
+  })
+}
+
 </script>
 
 </body>
