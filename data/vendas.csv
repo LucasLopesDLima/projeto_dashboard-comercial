@@ -1,5 +1,5 @@
 id_pedido,data,cliente,regiao,produto,categoria,quantidade,preco_unitario,vendedor,status
-1,2024-01-05,Empresa A,Sudeste,Notebook,Eletrônicos,4,3500,João,Concluído
+1,2024-01-05,Empresa A,Sudeste,Notebook,Eletrônicos,3,3500,João,Concluído
 2,2024-01-10,Empresa B,Sul,Mouse,Periféricos,10,80,Maria,Concluído
 3,2024-01-12,Empresa C,Nordeste,Teclado,Periféricos,5,150,Carlos,Pendente
 4,2024-01-15,Empresa D,Sudeste,Monitor,Eletrônicos,3,1200,João,Concluído
