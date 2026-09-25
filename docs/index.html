@@ -8,27 +8,73 @@
 
 <h2>Vendas por Vendedor</h2>
 
+<label>Filtrar por Região:</label>
+<select id="filtroRegiao">
+  <option value="all">Todas</option>
+</select>
+
 <canvas id="grafico"></canvas>
 
 <script>
+let dados = []
+let chart
+
 fetch('data.json')
   .then(res => res.json())
-  .then(data => {
+  .then(json => {
+    dados = json
 
-    const labels = data.map(d => d.vendedor)
-    const valores = data.map(d => d.total)
+    // Preencher filtro dinamicamente
+    const regioes = [...new Set(dados.map(d => d.regiao))]
+    const select = document.getElementById('filtroRegiao')
 
-    new Chart(document.getElementById('grafico'), {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Total de Vendas',
-          data: valores
-        }]
-      }
+    regioes.forEach(r => {
+      let option = document.createElement('option')
+      option.value = r
+      option.text = r
+      select.appendChild(option)
     })
+
+    atualizarGrafico('all')
   })
+
+document.getElementById('filtroRegiao')
+  .addEventListener('change', (e) => {
+    atualizarGrafico(e.target.value)
+  })
+
+function atualizarGrafico(regiao) {
+
+  let filtrado = regiao === 'all'
+    ? dados
+    : dados.filter(d => d.regiao === regiao)
+
+  // Agrupar no frontend
+  let resumo = {}
+
+  filtrado.forEach(d => {
+    if (!resumo[d.vendedor]) {
+      resumo[d.vendedor] = 0
+    }
+    resumo[d.vendedor] += d.total
+  })
+
+  let labels = Object.keys(resumo)
+  let valores = Object.values(resumo)
+
+  if (chart) chart.destroy()
+
+  chart = new Chart(document.getElementById('grafico'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Total de Vendas',
+        data: valores
+      }]
+    }
+  })
+}
 </script>
 
 </body>
