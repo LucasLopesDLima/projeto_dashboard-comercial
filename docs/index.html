@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard Comercial</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>Vendas por Vendedor</h2>
+
+<canvas id="grafico"></canvas>
+
+<script>
+fetch('data.json')
+  .then(res => res.json())
+  .then(data => {
+
+    const labels = data.map(d => d.vendedor)
+    const valores = data.map(d => d.total)
+
+    new Chart(document.getElementById('grafico'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Total de Vendas',
+          data: valores
+        }]
+      }
+    })
+  })
+</script>
+
+</body>
+</html>
