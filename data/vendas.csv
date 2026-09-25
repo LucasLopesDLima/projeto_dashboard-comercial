@@ -1,0 +1,11 @@
+id_pedido,data,cliente,regiao,produto,categoria,quantidade,preco_unitario,vendedor,status
+1,2024-01-05,Empresa A,Sudeste,Notebook,Eletrônicos,2,3500,João,Concluído
+2,2024-01-10,Empresa B,Sul,Mouse,Periféricos,10,80,Maria,Concluído
+3,2024-01-12,Empresa C,Nordeste,Teclado,Periféricos,5,150,Carlos,Pendente
+4,2024-01-15,Empresa D,Sudeste,Monitor,Eletrônicos,3,1200,João,Concluído
+5,2024-02-01,Empresa E,Norte,Notebook,Eletrônicos,1,4000,Ana,Cancelado
+6,2024-02-03,Empresa F,Sul,Headset,Periféricos,4,300,Maria,Concluído
+7,2024-02-10,Empresa G,Sudeste,Mouse,Periféricos,8,90,Carlos,Pendente
+8,2024-02-12,Empresa H,Nordeste,Monitor,Eletrônicos,2,1100,Ana,Concluído
+9,2024-03-01,Empresa I,Sudeste,Notebook,Eletrônicos,1,3800,João,Concluído
+10,2024-03-05,Empresa J,Sul,Teclado,Periféricos,6,140,Maria,Concluído
