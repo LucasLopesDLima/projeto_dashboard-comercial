@@ -2,57 +2,108 @@
 <html>
 <head>
   <title>Dashboard Comercial</title>
+
+  <!-- Biblioteca de gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* ========================
+       ESTILO GLOBAL
+    ======================== */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f6fa;
+    }
+
+    h2 {
+      margin-bottom: 5px;
+    }
+
+    /* KPI principal */
+    #kpiTotal {
+      margin-top: 5px;
+      margin-bottom: 20px;
+    }
+
+    /* Container central do dashboard */
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    /* "Card" dos gráficos */
+    .chart-container {
+      width: 100%;
+      height: 300px;
+      margin-bottom: 30px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- Título -->
-<h2>Vendas por Vendedor</h2>
+<!-- Container principal -->
+<div class="container">
 
-<!-- Última atualização (vem do ETL) -->
-<p id="ultimaAtualizacao" style="color: gray; font-size: 12px;"></p>
+  <!-- Título -->
+  <h2>Vendas por Vendedor</h2>
 
-<!-- KPI principal -->
-<h3 id="kpiTotal"></h3>
+  <!-- Última atualização -->
+  <p id="ultimaAtualizacao" style="color: gray; font-size: 12px;"></p>
 
-<!-- Filtro -->
-<label>Filtrar por Região:</label>
-<select id="filtroRegiao">
-  <option value="all">Todas</option>
-</select>
+  <!-- KPI -->
+  <h3 id="kpiTotal"></h3>
 
-<!-- Gráfico 1 -->
-<canvas id="grafico"></canvas>
+  <!-- Filtro -->
+  <label>Filtrar por Região:</label>
+  <select id="filtroRegiao">
+    <option value="all">Todas</option>
+  </select>
 
-<!-- Gráfico 2 -->
-<h2>Vendas por Mês</h2>
-<canvas id="graficoMes"></canvas>
+  <br><br>
+
+  <!-- Gráfico 1 -->
+  <div class="chart-container">
+    <canvas id="grafico"></canvas>
+  </div>
+
+  <!-- Gráfico 2 -->
+  <div class="chart-container">
+    <canvas id="graficoMes"></canvas>
+  </div>
+
+</div>
 
 <script>
 
 // ========================
 // VARIÁVEIS GLOBAIS
 // ========================
-let dados = []
-let chart
-let chartMes
+let dados = []        // Armazena os dados do JSON
+let chart             // Gráfico por vendedor
+let chartMes          // Gráfico por mês
 
 // ========================
-// CARREGAR DADOS
+// CARREGAR DADOS (API local JSON)
 // ========================
 fetch('data.json')
   .then(res => res.json())
   .then(json => {
 
-    // 🕒 Última atualização
+    // 🕒 Mostrar data de atualização
     document.getElementById('ultimaAtualizacao')
       .innerText = "Última atualização: " + json.atualizado_em
 
-    // 📊 Dados principais
+    // 📊 Dados vindos do ETL
     dados = json.dados
 
     // ========================
-    // KPI TOTAL
+    // KPI TOTAL (soma geral)
     // ========================
     const totalGeral = dados.reduce((acc, d) => acc + d.total, 0)
 
@@ -60,7 +111,7 @@ fetch('data.json')
       .innerText = "Total de Vendas: R$ " + totalGeral.toLocaleString('pt-BR')
 
     // ========================
-    // PREENCHER FILTRO
+    // PREENCHER FILTRO DINAMICAMENTE
     // ========================
     const regioes = [...new Set(dados.map(d => d.regiao))]
     const select = document.getElementById('filtroRegiao')
@@ -85,7 +136,7 @@ document.getElementById('filtroRegiao')
   })
 
 // ========================
-// FUNÇÃO PRINCIPAL
+// FUNÇÃO PRINCIPAL (orquestra tudo)
 // ========================
 function atualizarGraficos(regiao) {
 
@@ -94,17 +145,19 @@ function atualizarGraficos(regiao) {
     ? dados
     : dados.filter(d => d.regiao === regiao)
 
+  // Atualizar gráficos
   atualizarGraficoVendedor(filtrado)
   atualizarGraficoMes(filtrado)
 }
 
 // ========================
-// GRÁFICO POR VENDEDOR
+// GRÁFICO 1 — VENDEDOR
 // ========================
 function atualizarGraficoVendedor(dadosFiltrados) {
 
   let resumo = {}
 
+  // Agrupar vendas por vendedor
   dadosFiltrados.forEach(d => {
     if (!resumo[d.vendedor]) {
       resumo[d.vendedor] = 0
@@ -115,6 +168,7 @@ function atualizarGraficoVendedor(dadosFiltrados) {
   let labels = Object.keys(resumo)
   let valores = Object.values(resumo)
 
+  // Evita sobreposição
   if (chart) chart.destroy()
 
   chart = new Chart(document.getElementById('grafico'), {
@@ -125,17 +179,22 @@ function atualizarGraficoVendedor(dadosFiltrados) {
         label: 'Total de Vendas',
         data: valores
       }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
     }
   })
 }
 
 // ========================
-// GRÁFICO POR MÊS
+// GRÁFICO 2 — POR MÊS
 // ========================
 function atualizarGraficoMes(dadosFiltrados) {
 
   let resumoMes = {}
 
+  // Agrupar por mês
   dadosFiltrados.forEach(d => {
     if (!resumoMes[d.mes]) {
       resumoMes[d.mes] = 0
@@ -143,7 +202,7 @@ function atualizarGraficoMes(dadosFiltrados) {
     resumoMes[d.mes] += d.total
   })
 
-  // 🔥 Ordenar meses corretamente
+  // Ordenar meses corretamente
   let labels = Object.keys(resumoMes).sort((a,b) => a-b)
   let valores = labels.map(l => resumoMes[l])
 
@@ -157,6 +216,10 @@ function atualizarGraficoMes(dadosFiltrados) {
         label: 'Vendas por Mês',
         data: valores
       }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
     }
   })
 }
