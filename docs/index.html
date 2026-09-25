@@ -1,174 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Dashboard Comercial</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f6fa;
-    }
-
-    .container {
-      height: 100vh;
-      padding: 15px;
-      box-sizing: border-box;
-    }
-
-    /* HEADER */
-    .header {
-      margin-bottom: 10px;
-    }
-
-    /* FILTROS */
-    .filtros {
-      display: flex;
-      gap: 20px;
-      margin: 10px 0;
-    }
-
-    /* GRID */
-    .parent {
-      display: grid;
-      height: calc(100% - 120px);
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: 100px 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* CARDS */
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* 🔵 PRIMEIRA LINHA AZUL CUSTOM */
-    .parent > .card:nth-child(-n+4) {
-      background: rgb(17,17,132);
-      color: white;
-    }
-
-    /* KPI */
-    .kpi h2 {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    /* GRÁFICOS */
-    .chart-container {
-      position: relative;
-      flex: 1;
-    }
-
-    canvas {
-      position: absolute;
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    /* POSIÇÃO */
-    .div5 {
-      grid-column: 1 / 3;
-      grid-row: 2 / 4;
-    }
-
-    .div6 {
-      grid-column: 3 / 5;
-      grid-row: 2 / 4;
-    }
-
-  </style>
-</head>
-
-<body>
-
-<div class="container">
-
-  <div class="header">
-    <h2>Dashboard Comercial</h2>
-    <p id="ultimaAtualizacao" style="font-size: 12px; color: gray;"></p>
-  </div>
-
-  <!-- FILTROS -->
-  <div class="filtros">
-
-    <div>
-      <label>Região:</label><br>
-      <select id="filtroRegiao">
-        <option value="all">Todas</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Vendedor:</label><br>
-      <select id="filtroVendedor">
-        <option value="all">Todos</option>
-      </select>
-    </div>
-
-  </div>
-
-  <div class="parent">
-
-    <!-- KPI TOTAL -->
-    <div class="card kpi">
-      <span>Total de Vendas</span>
-      <h2 id="kpiTotal"></h2>
-    </div>
-
-    <!-- KPI PEDIDOS -->
-    <div class="card kpi">
-      <span>Pedidos</span>
-      <h2 id="kpiPedidos"></h2>
-    </div>
-
-    <!-- KPI TOP -->
-    <div class="card kpi">
-      <span>Melhor Vendedor</span>
-      <h2 id="kpiTopVendedor"></h2>
-    </div>
-
-    <!-- KPI TICKET MÉDIO -->
-    <div class="card kpi">
-      <span>Ticket Médio</span>
-      <h2 id="kpiTicket"></h2>
-    </div>
-
-    <!-- GRÁFICO VENDEDOR -->
-    <div class="card div5">
-      <h4>Total de Vendas por Vendedor</h4>
-      <div class="chart-container">
-        <canvas id="grafico"></canvas>
-      </div>
-    </div>
-
-    <!-- GRÁFICO MÊS -->
-    <div class="card div6">
-      <h4>Vendas por Mês</h4>
-      <div class="chart-container">
-        <canvas id="graficoMes"></canvas>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
 <script>
 
 let dados = []
 let chart
 let chartMes
+
+// 🔥 estado de filtro por clique
+let filtroGrafico = {
+  vendedor: null,
+  mes: null
+}
 
 // ========================
 fetch('data.json')
@@ -219,8 +59,12 @@ function aplicarFiltros(){
   let vendedor = document.getElementById('filtroVendedor').value
 
   let filtrado = dados.filter(d => {
+
     return (regiao === 'all' || d.regiao === regiao) &&
-           (vendedor === 'all' || d.vendedor === vendedor)
+           (vendedor === 'all' || d.vendedor === vendedor) &&
+           (filtroGrafico.vendedor === null || d.vendedor === filtroGrafico.vendedor) &&
+           (filtroGrafico.mes === null || d.mes == filtroGrafico.mes)
+
   })
 
   atualizarTudo(filtrado)
@@ -263,6 +107,8 @@ function atualizarKPIs(d){
 }
 
 // ========================
+// 🔥 GRÁFICO COM CLIQUE
+// ========================
 function atualizarGraficoVendedor(d){
 
   let resumo = {}
@@ -285,11 +131,28 @@ function atualizarGraficoVendedor(d){
     },
     options:{
       responsive:true,
-      maintainAspectRatio:false
+      maintainAspectRatio:false,
+
+      // 🔥 CLIQUE
+      onClick: (evt, elements) => {
+        if(elements.length > 0){
+
+          let index = elements[0].index
+          let vendedor = chart.data.labels[index]
+
+          // toggle (liga/desliga)
+          filtroGrafico.vendedor =
+            filtroGrafico.vendedor === vendedor ? null : vendedor
+
+          aplicarFiltros()
+        }
+      }
     }
   })
 }
 
+// ========================
+// 🔥 GRÁFICO COM CLIQUE
 // ========================
 function atualizarGraficoMes(d){
 
@@ -317,12 +180,23 @@ function atualizarGraficoMes(d){
     },
     options:{
       responsive:true,
-      maintainAspectRatio:false
+      maintainAspectRatio:false,
+
+      // 🔥 CLIQUE
+      onClick: (evt, elements) => {
+        if(elements.length > 0){
+
+          let index = elements[0].index
+          let mes = chartMes.data.labels[index]
+
+          filtroGrafico.mes =
+            filtroGrafico.mes == mes ? null : mes
+
+          aplicarFiltros()
+        }
+      }
     }
   })
 }
 
 </script>
-
-</body>
-</html>
