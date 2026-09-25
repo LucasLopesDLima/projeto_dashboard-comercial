@@ -17,7 +17,7 @@ df['data'] = pd.to_datetime(df['data'])
 df['mes'] = df['data'].dt.month
 
 # 🔥 CONVERTER PARA STRING (ESSENCIAL)
-df['data'] = df['data'].astype(str)
+df['data'] = df['data'].dt.strftime('%Y-%m-%d')
 
 # Cálculo
 df['total'] = df['quantidade'] * df['preco_unitario']
