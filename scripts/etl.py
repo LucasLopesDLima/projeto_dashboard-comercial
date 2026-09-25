@@ -13,10 +13,8 @@ df['mes'] = df['data'].dt.month
 # Cálculo
 df['total'] = df['quantidade'] * df['preco_unitario']
 
-# Agregação simples (ex: total por vendedor)
-resumo = df.groupby('vendedor')['total'].sum().reset_index()
-
-# Salvar JSON para dashboard
-resumo.to_json('docs/data.json', orient='records')
+# 🔥 IMPORTANTE: não agregar
+# Exporta dados detalhados
+df.to_json('docs/data.json', orient='records', date_format='iso')
 
 print("ETL executado com sucesso")
