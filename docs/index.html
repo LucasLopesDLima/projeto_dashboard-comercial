@@ -1,66 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dashboard Comercial</title>
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Ícones (Font Awesome) -->
+  <!-- Font Awesome (ícones) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
-
     /* ========================
-       BASE / LAYOUT GLOBAL
+       RESET / BASE
     ======================== */
-
     html, body {
-      height: 100%;
       margin: 0;
       font-family: Arial, sans-serif;
-
-      /* 🔥 Fundo mais escuro (melhor contraste) */
-      background: #1e1e2f;
-      color: #333;
+      background: #1e1e2f;    /* fundo escuro */
+      color: #fff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
+    /* Por padrão deixamos permitir rolagem — será bloqueada apenas em telas grandes */
+    body { overflow: auto; }
+
+    /* container geral — largura responsiva e espaçamento lateral */
     .container {
-      height: 100vh;
-
-      /* 🔥 Espaçamento lateral (respiro visual) */
-      padding: 20px 30px;
-
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 24px;   /* recuo entre bordas da tela e conteúdo */
       box-sizing: border-box;
     }
 
     /* ========================
        HEADER
     ======================== */
-
     .header h2 {
       margin: 0;
-      color: white;
+      color: #ffffff;
       text-transform: uppercase;
+      font-size: 18px;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-
     .header p {
-      margin: 5px 0 0 0;
+      margin: 6px 0 0 0;
       font-size: 12px;
-      color: #bbb;
+      color: #bfc7d6;
       text-transform: uppercase;
     }
 
     /* ========================
        FILTROS
     ======================== */
-
     .filtros {
       display: flex;
-      gap: 30px;
+      gap: 20px;
       margin: 18px 0;
       color: white;
       align-items: flex-end;
+      flex-wrap: nowrap; /* mudará em mobile */
     }
 
     .filtro {
@@ -76,9 +80,7 @@
       gap: 8px;
       font-size: 13px;
       font-weight: 600;
-      color: white;
-      min-height: 18px;
-      text-transform: uppercase;
+      color: #e6eef8;
     }
 
     select {
@@ -90,19 +92,18 @@
       box-sizing: border-box;
       font-size: 14px;
       color: #1e1e2f;
-      background: white;
+      background: #ffffff;
     }
 
     /* ========================
-       GRID PRINCIPAL
+       GRID PRINCIPAL (DESKTOP)
+       - Em telas grandes ocupamos a altura da viewport (100vh)
+       - Em telas pequenas (mobile/tablet) quebramos para 1 coluna
     ======================== */
 
+    /* Grid default (desktop) - altura controlada pela media query abaixo */
     .parent {
       display: grid;
-
-      /* 🔥 ocupa tela inteira sem scroll */
-      height: calc(100% - 130px);
-
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: 96px 1fr 1fr;
       gap: 15px;
@@ -111,93 +112,141 @@
     /* ========================
        CARDS
     ======================== */
-
     .card {
-      background: white;
+      background: #ffffff;
+      color: #1e1e2f;
       border-radius: 12px;
-      padding: 15px;
-
-      /* sombra mais suave */
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-
+      padding: 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* 🔵 LINHA DE KPI */
-    .parent > .card:nth-child(-n+4) {
-      background: white;
-      color: #1e1e2f;
-    }
-
-    /* ========================
-       KPI
-    ======================== */
-
+    /* first row (KPIs) look */
     .kpi {
       justify-content: center;
       gap: 7px;
-      padding: 12px 14px;
+      padding: 10px 12px;
+      align-items: center;
+      text-align: center;
     }
 
     .kpi span {
       font-size: 11px;
-      opacity: 0.8;
+      opacity: 1;
       text-transform: uppercase;
-      letter-spacing: 0.2px;
-      line-height: 1.15;
+      letter-spacing: 0.3px;
+      color: #1e1e2f;
     }
 
     .kpi h2 {
-      margin: 0;
-      font-size: 19px;
-      text-transform: uppercase;
-      text-align: center;
-      line-height: 1.2;
+      margin: 6px 0 0 0;
+      font-size: 24px;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 30px;
+      color: #0f1724;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
     }
 
-    .kpi i {
-      margin-right: 6px;
-    }
+    .kpi i { color: #1e1e2f; }
 
-    /* ========================
-       GRÁFICOS
-    ======================== */
+    /* gráficos */
+    .card h4 {
+      margin: 0 0 10px 0;
+      text-transform: uppercase;
+      color: #0f1724;
+      font-size: 13px;
+      letter-spacing: 0.6px;
+    }
 
     .chart-container {
       position: relative;
       flex: 1;
+      min-height: 220px; /* garante espaço base */
     }
 
-    .card h4 {
-      text-transform: uppercase;
-      margin: 0 0 10px 0;
-    }
-
+    /* Canvas: por padrão ocupa 100% do container via absolute (preenche) */
     canvas {
       position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
       width: 100% !important;
       height: 100% !important;
+      display: block;
     }
 
     /* ========================
-       POSICIONAMENTO GRID
+       POSICIONAMENTO GRID (cards grandes)
     ======================== */
+    .div5 { grid-column: 1 / 3; grid-row: 2 / 4; }
+    .div6 { grid-column: 3 / 5; grid-row: 2 / 4; }
 
-    .div5 {
-      grid-column: 1 / 3;
-      grid-row: 2 / 4;
+    /* ========================
+       MEDIA QUERY: telas grandes (desktop)
+       - aqui forçamos full-screen (sem rolagem) quando houver espaço
+    ======================== */
+    @media (min-width: 901px) {
+      html, body { height: 100%; }
+      body { overflow: hidden; } /* bloqueia rolagem na tela grande */
+      .container { height: 100vh; padding: 28px 34px; }
+      /* calcular grid para ocupar o restante sem rolagem */
+      .parent { height: calc(100vh - 120px); }
+      .chart-container { min-height: 0; } /* charts preencherão o espaço do grid */
     }
 
-    .div6 {
-      grid-column: 3 / 5;
-      grid-row: 2 / 4;
+    /* ========================
+       MEDIA QUERY: tablets e celulares (≤ 900px)
+       - empilha tudo em 1 coluna, permite rolagem, ajusta tamanhos
+    ======================== */
+    @media (max-width: 900px) {
+
+      /* container permite rolagem natural do dispositivo (melhor UX mobile) */
+      .container { padding: 14px 12px; }
+
+      /* filtros empilham e ocupam 100% */
+      .filtros {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .filtro { min-width: 0; width: 100%; }
+
+      /* grid vira 1 coluna — cada card fica empilhado */
+      .parent {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        gap: 12px;
+        height: auto; /* permite rolagem */
+      }
+
+      /* cards grandes ocupam toda largura (removemos span) */
+      .div5, .div6 { grid-column: auto; grid-row: auto; }
+
+      /* gráfico recebe altura fixa, e canvas deixa de ser absolute
+         (isso evita que o canvas tente preencher um container com altura 0) */
+      .chart-container { position: relative; min-height: 260px; }
+      canvas { position: relative; height: auto !important; }
+
+      /* select ocupa largura completa */
+      select { width: 100%; box-sizing: border-box; }
+
+      /* KPI fontes levemente menores para caber melhor */
+      .kpi h2 { font-size: 20px; }
+      .kpi span { font-size: 10px; }
+    }
+
+    /* ========================
+       MEDIA QUERY: telas muito pequenas (≤ 420px)
+       - ainda mais otimização (tamanho de textos e gaps)
+    ======================== */
+    @media (max-width: 420px) {
+      .container { padding: 12px; }
+      .filtros { gap: 8px; }
+      .chart-container { min-height: 200px; }
+      .kpi h2 { font-size: 18px; }
+      .kpi span { font-size: 9px; }
     }
 
   </style>
@@ -205,356 +254,201 @@
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-  <!-- ========================
-       HEADER
-  ======================== -->
-  <div class="header">
-    <h2><i class="fa-solid fa-chart-line"></i> Dashboard Comercial</h2>
-    <p id="ultimaAtualizacao"></p>
-  </div>
-
-  <!-- ========================
-       FILTROS
-  ======================== -->
-  <div class="filtros">
-
-    <div class="filtro">
-      <label><i class="fa-solid fa-map"></i> Região</label>
-      <select id="filtroRegiao">
-        <option value="all">Todas</option>
-      </select>
+    <!-- Header -->
+    <div class="header">
+      <h2><i class="fa-solid fa-chart-line"></i> Dashboard Comercial</h2>
+      <p id="ultimaAtualizacao">Carregando...</p>
     </div>
 
-    <div class="filtro">
-      <label><i class="fa-solid fa-user"></i> Vendedor</label>
-      <select id="filtroVendedor">
-        <option value="all">Todos</option>
-      </select>
-    </div>
+    <!-- Filtros -->
+    <div class="filtros">
+      <div class="filtro">
+        <label><i class="fa-solid fa-map"></i> Região</label>
+        <select id="filtroRegiao"><option value="all">Todas</option></select>
+      </div>
 
-  </div>
-
-  <!-- ========================
-       GRID
-  ======================== -->
-  <div class="parent">
-
-    <!-- KPI TOTAL -->
-    <div class="card kpi">
-      <span><i class="fa-solid fa-dollar-sign"></i> Total de Vendas</span>
-      <h2 id="kpiTotal"></h2>
-    </div>
-
-    <!-- KPI PEDIDOS -->
-    <div class="card kpi">
-      <span><i class="fa-solid fa-box"></i> Pedidos</span>
-      <h2 id="kpiPedidos"></h2>
-    </div>
-
-    <!-- KPI TOP -->
-    <div class="card kpi">
-      <span><i class="fa-solid fa-trophy"></i> Melhor Vendedor</span>
-      <h2 id="kpiTopVendedor"></h2>
-    </div>
-
-    <!-- KPI TICKET -->
-    <div class="card kpi">
-      <span><i class="fa-solid fa-receipt"></i> Ticket Médio</span>
-      <h2 id="kpiTicket"></h2>
-    </div>
-
-    <!-- GRÁFICO VENDEDOR -->
-    <div class="card div5">
-      <h4>Vendas por Vendedor</h4>
-      <div class="chart-container">
-        <canvas id="grafico"></canvas>
+      <div class="filtro">
+        <label><i class="fa-solid fa-user"></i> Vendedor</label>
+        <select id="filtroVendedor"><option value="all">Todos</option></select>
       </div>
     </div>
 
-    <!-- GRÁFICO MÊS -->
-    <div class="card div6">
-      <h4>Vendas por Mês</h4>
-      <div class="chart-container">
-        <canvas id="graficoMes"></canvas>
-      </div>
-    </div>
+    <!-- Grid -->
+    <div class="parent">
 
+      <!-- KPIs -->
+      <div class="card kpi">
+        <span><i class="fa-solid fa-dollar-sign"></i> Total de Vendas</span>
+        <h2 id="kpiTotal">R$ 0,00</h2>
+      </div>
+
+      <div class="card kpi">
+        <span><i class="fa-solid fa-box"></i> Pedidos</span>
+        <h2 id="kpiPedidos">0</h2>
+      </div>
+
+      <div class="card kpi">
+        <span><i class="fa-solid fa-trophy"></i> Melhor Vendedor</span>
+        <h2 id="kpiTopVendedor">-</h2>
+      </div>
+
+      <div class="card kpi">
+        <span><i class="fa-solid fa-receipt"></i> Ticket Médio</span>
+        <h2 id="kpiTicket">R$ 0,00</h2>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="card div5">
+        <h4>Vendas por Vendedor</h4>
+        <div class="chart-container"><canvas id="grafico"></canvas></div>
+      </div>
+
+      <div class="card div6">
+        <h4>Vendas por Mês</h4>
+        <div class="chart-container"><canvas id="graficoMes"></canvas></div>
+      </div>
+
+    </div>
   </div>
 
-</div>
+  <script>
+    /* ========================
+       Código JS (igual ao seu, com pequenas melhorias)
+       - mantém filtros, KPIs e comportamento de clique
+    ========================= */
 
-<script>
+    let dados = []
+    let chart, chartMes
+    let vendedorSelecionado = null
 
-/* ========================
-   ESTADO GLOBAL
-======================== */
-let dados = []
-let chart
-let chartMes
+    // Carregar JSON processado gerado pelo ETL
+    fetch('data.json').then(r => r.json()).then(json => {
+      document.getElementById('ultimaAtualizacao').innerText = "Última atualização: " + json.atualizado_em
+      dados = json.dados || []
+      preencherFiltros(dados)
+      aplicarFiltros()
+    }).catch(err => {
+      console.error('Erro ao carregar data.json', err)
+      document.getElementById('ultimaAtualizacao').innerText = "Erro ao carregar dados"
+    })
 
-// 🔥 Guarda filtro por clique (efeito Power BI)
-let vendedorSelecionado = null
+    function preencherFiltros(d){
+      const regioes = [...new Set(d.map(x=>x.regiao))]
+      const vendedores = [...new Set(d.map(x=>x.vendedor))]
 
-/* ========================
-   CARREGAR DADOS
-======================== */
-fetch('data.json')
-  .then(res => res.json())
-  .then(json => {
+      const selectRegiao = document.getElementById('filtroRegiao')
+      const selectVendedor = document.getElementById('filtroVendedor')
 
-    // Mostrar data do ETL
-    document.getElementById('ultimaAtualizacao')
-      .innerText = "Última atualização: " + json.atualizado_em
-
-    dados = json.dados
-
-    preencherFiltros(dados)
-    aplicarFiltros()
-  })
-
-/* ========================
-   PREENCHER FILTROS
-======================== */
-function preencherFiltros(d){
-
-  const regioes = [...new Set(d.map(x=>x.regiao))]
-  const vendedores = [...new Set(d.map(x=>x.vendedor))]
-
-  const selectRegiao = document.getElementById('filtroRegiao')
-  const selectVendedor = document.getElementById('filtroVendedor')
-
-  regioes.forEach(r=>{
-    let opt = document.createElement('option')
-    opt.value = r
-    opt.text = r
-    selectRegiao.appendChild(opt)
-  })
-
-  vendedores.forEach(v=>{
-    let opt = document.createElement('option')
-    opt.value = v
-    opt.text = v
-    selectVendedor.appendChild(opt)
-  })
-}
-
-/* ========================
-   EVENTOS DOS FILTROS
-======================== */
-document.getElementById('filtroRegiao').addEventListener('change', ()=>{
-  vendedorSelecionado = null
-  aplicarFiltros()
-})
-
-document.getElementById('filtroVendedor').addEventListener('change', ()=>{
-  vendedorSelecionado = null
-  aplicarFiltros()
-})
-
-/* ========================
-   APLICAR FILTROS
-======================== */
-function aplicarFiltros(){
-
-  let regiao = document.getElementById('filtroRegiao').value
-  let vendedor = document.getElementById('filtroVendedor').value
-
-  let filtrado = dados.filter(d => {
-    return (regiao === 'all' || d.regiao === regiao) &&
-           (vendedor === 'all' || d.vendedor === vendedor)
-  })
-
-  // 🔥 filtro por clique no gráfico
-  if(vendedorSelecionado){
-    filtrado = filtrado.filter(d => d.vendedor === vendedorSelecionado)
-  }
-
-  atualizarTudo(filtrado)
-}
-
-/* ========================
-   ATUALIZA TUDO
-======================== */
-function atualizarTudo(d){
-  atualizarKPIs(d)
-  atualizarGraficoVendedor(d)
-  atualizarGraficoMes(d)
-}
-
-/* ========================
-   KPIs
-======================== */
-function atualizarKPIs(d){
-
-  const total = d.reduce((acc,x)=>acc+x.total,0)
-  const pedidos = d.length
-  const ticket = pedidos ? total / pedidos : 0
-
-  document.getElementById('kpiTotal')
-    .innerText = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(total)
-
-  document.getElementById('kpiPedidos')
-    .innerText = pedidos
-
-  document.getElementById('kpiTicket')
-    .innerText = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(ticket)
-
-  let resumo = {}
-  d.forEach(x=>{
-    if(!resumo[x.vendedor]) resumo[x.vendedor]=0
-    resumo[x.vendedor]+=x.total
-  })
-
-  let top = Object.entries(resumo)
-    .sort((a,b)=>b[1]-a[1])[0]
-
-  document.getElementById('kpiTopVendedor')
-    .innerText = top ? top[0] : "-"
-}
-
-/* ========================
-   GRÁFICO VENDEDOR
-======================== */
-function atualizarGraficoVendedor(d){
-
-  let resumo = {}
-  d.forEach(x=>{
-    if(!resumo[x.vendedor]) resumo[x.vendedor]=0
-    resumo[x.vendedor]+=x.total
-  })
-
-  let labels = Object.keys(resumo)
-
-  // 🔥 destaque visual do selecionado
-  let cores = labels.map(l =>
-    l === vendedorSelecionado
-      ? '#f97316'
-      : 'rgb(17,17,132)'
-  )
-
-  if(chart) chart.destroy()
-
-  chart = new Chart(grafico,{
-    type:'bar',
-    data:{
-      labels:labels,
-      datasets:[{
-        data:Object.values(resumo),
-        backgroundColor:cores
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{
-          display:false
-        }
-      },
-      scales:{
-        x:{
-          title:{
-            display:true,
-            text:'Vendedor',
-            color:'#1e1e2f',
-            font:{ weight:'bold' }
-          },
-          ticks:{ color:'#1e1e2f' }
-        },
-        y:{
-          title:{
-            display:true,
-            text:'Valor (R$)',
-            color:'#1e1e2f',
-            font:{ weight:'bold' }
-          },
-          ticks:{ color:'#1e1e2f' }
-        }
-      },
-
-      // 🔥 clique estilo Power BI
-      onClick: (evt, elements) => {
-        if(elements.length > 0){
-          const index = elements[0].index
-          const vendedor = labels[index]
-
-          vendedorSelecionado =
-            vendedorSelecionado === vendedor ? null : vendedor
-
-          aplicarFiltros()
-        }
-      }
+      regioes.forEach(r=>{
+        const opt = document.createElement('option'); opt.value = r; opt.text = r; selectRegiao.appendChild(opt)
+      })
+      vendedores.forEach(v=>{
+        const opt = document.createElement('option'); opt.value = v; opt.text = v; selectVendedor.appendChild(opt)
+      })
     }
-  })
-}
 
-/* ========================
-   GRÁFICO MÊS
-======================== */
-function atualizarGraficoMes(d){
+    document.getElementById('filtroRegiao').addEventListener('change', ()=>{
+      vendedorSelecionado = null
+      aplicarFiltros()
+    })
+    document.getElementById('filtroVendedor').addEventListener('change', ()=>{
+      vendedorSelecionado = null
+      aplicarFiltros()
+    })
 
-  let resumo = {}
-  d.forEach(x=>{
-    if(!resumo[x.mes]) resumo[x.mes]=0
-    resumo[x.mes]+=x.total
-  })
+    function aplicarFiltros(){
+      const regiao = document.getElementById('filtroRegiao').value
+      const vendedorFiltro = document.getElementById('filtroVendedor').value
 
-  let labels = Object.keys(resumo).sort((a,b)=>a-b)
+      let filtrado = dados.filter(d => (regiao === 'all' || d.regiao === regiao) && (vendedorFiltro === 'all' || d.vendedor === vendedorFiltro))
 
-  if(chartMes) chartMes.destroy()
+      // aplica filtro do clique (toggle)
+      if(vendedorSelecionado) filtrado = filtrado.filter(d => d.vendedor === vendedorSelecionado)
 
-  chartMes = new Chart(graficoMes,{
-    type:'line',
-    data:{
-      labels:labels,
-      datasets:[{
-        data:labels.map(l=>resumo[l]),
-        borderColor:'rgb(17,17,132)',
-        backgroundColor:'rgba(17,17,132,0.2)',
-        tension:0.3
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{
-          display:false
-        }
-      },
-      scales:{
-        x:{
-          title:{
-            display:true,
-            text:'Mês',
-            color:'#1e1e2f',
-            font:{ weight:'bold' }
-          },
-          ticks:{ color:'#1e1e2f' }
-        },
-        y:{
-          title:{
-            display:true,
-            text:'Valor (R$)',
-            color:'#1e1e2f',
-            font:{ weight:'bold' }
-          },
-          ticks:{ color:'#1e1e2f' }
-        }
-      }
+      atualizarTudo(filtrado)
     }
-  })
-}
 
-</script>
+    function atualizarTudo(d){
+      atualizarKPIs(d)
+      atualizarGraficoVendedor(d)
+      atualizarGraficoMes(d)
+    }
 
+    function atualizarKPIs(d){
+      const total = d.reduce((acc,x)=>acc + (Number(x.total)||0), 0)
+      const pedidos = d.length
+      const ticket = pedidos ? total / pedidos : 0
+
+      document.getElementById('kpiTotal').innerText = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(total)
+      document.getElementById('kpiPedidos').innerText = pedidos
+      document.getElementById('kpiTicket').innerText = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(ticket)
+
+      const resumo = {}
+      d.forEach(x => { resumo[x.vendedor] = (resumo[x.vendedor]||0) + (Number(x.total)||0) })
+      const top = Object.entries(resumo).sort((a,b)=>b[1]-a[1])[0]
+      document.getElementById('kpiTopVendedor').innerText = top ? top[0] : "-"
+    }
+
+    function atualizarGraficoVendedor(d){
+      const resumo = {}
+      d.forEach(x=> { resumo[x.vendedor] = (resumo[x.vendedor]||0) + (Number(x.total)||0) })
+      const labels = Object.keys(resumo)
+      const values = Object.values(resumo)
+
+      const cores = labels.map(l => l === vendedorSelecionado ? '#f97316' : 'rgb(17,17,132)')
+
+      if(chart) chart.destroy()
+
+      chart = new Chart(document.getElementById('grafico'), {
+        type:'bar',
+        data:{ labels: labels, datasets:[{ data: values, backgroundColor: cores }] },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ color:'#0f1724' }, title:{ display:true, text:'Vendedor', color:'#0f1724' }},
+            y:{ ticks:{ color:'#0f1724' }, title:{ display:true, text:'Valor (R$)', color:'#0f1724' }}
+          },
+          onClick:(evt, elements) => {
+            if(elements.length > 0){
+              const index = elements[0].index
+              const vendedor = labels[index]
+              vendedorSelecionado = vendedorSelecionado === vendedor ? null : vendedor
+              // sincroniza o select visual (se quiser manter seleção no select)
+              document.getElementById('filtroVendedor').value = vendedorSelecionado || 'all'
+              aplicarFiltros()
+            }
+          }
+        }
+      })
+    }
+
+    function atualizarGraficoMes(d){
+      const resumo = {}
+      d.forEach(x=> { resumo[x.mes] = (resumo[x.mes]||0) + (Number(x.total)||0) })
+      const labels = Object.keys(resumo).sort((a,b)=>a-b)
+      const values = labels.map(l=> resumo[l])
+
+      if(chartMes) chartMes.destroy()
+
+      chartMes = new Chart(document.getElementById('graficoMes'), {
+        type:'line',
+        data:{ labels: labels, datasets:[{ data: values, borderColor:'rgb(17,17,132)', backgroundColor:'rgba(17,17,132,0.2)', tension:0.3 }]},
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ color:'#0f1724' }, title:{ display:true, text:'Mês', color:'#0f1724' }},
+            y:{ ticks:{ color:'#0f1724' }, title:{ display:true, text:'Valor (R$)', color:'#0f1724' }}
+          }
+        }
+      })
+    }
+
+  </script>
 </body>
 </html>
