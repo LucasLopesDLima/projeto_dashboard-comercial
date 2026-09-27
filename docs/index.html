@@ -189,10 +189,15 @@
     ======================== */
     @media (min-width: 901px) {
       html, body { height: 100%; }
-      body { overflow: hidden; } /* bloqueia rolagem na tela grande */
-      .container { height: 100vh; padding: 28px 34px; }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .container { width: 94vw; height: 92vh; padding: 24px 30px; }
       /* calcular grid para ocupar o restante sem rolagem */
-      .parent { height: calc(100vh - 120px); }
+      .parent { height: calc(92vh - 185px); }
       .chart-container { min-height: 0; } /* charts preencherão o espaço do grid */
     }
 
